@@ -1,0 +1,392 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix srest: <https://www.stemmaweb.net/ontologies/stemmarest#> .
+@prefix srshps: <https://www.stemmaweb.net/ontologies/shapes#> .
+@prefix intern: <https://www.stemmaweb.net/ontologies/internal#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+###### Common properties #####
+
+srshps:namePropShape a sh:PropertyShape ;
+    sh:path srest:name ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:minLength 1 ;
+    sh:datatype xsd:string .
+
+srshps:langPropShape a sh:PropertyShape ;
+    sh:path srest:language ;
+    sh:maxCount 1 ;
+    sh:minLength 1 ;
+    sh:datatype xsd:string .
+
+###### Node shapes ######
+
+### Tradition
+srest:TraditionShape a sh:NodeShape ;
+    sh:targetClass srest:Tradition ;
+
+    ## Object properties
+    sh:property [
+        sh:path srest:witnessedBy ;
+        sh:class srest:Witness ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasSection ;
+        sh:class srest:Section ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasStemma ;
+        sh:class srest:Stemma ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasRelationType ;
+        sh:class srest:RelationType ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasAnnotationType ;
+        sh:class srest:AnnotationLabel ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasAnnotation ;
+        sh:class srest:Annotation ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+
+    ## Data properties
+    sh:property srshps:namePropShape ;
+    sh:property srshps:langPropShape ;
+    sh:property [
+        sh:path srest:direction ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^(LR|RL|BI)$";
+    ] ;
+    sh:property [
+        sh:path srest:isPublic ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type intern:version )
+.
+
+### Witness
+srshps:WitnessShape a sh:NodeShape ;
+    sh:targetClass srest:Witness ;
+
+    ## Object properties
+    sh:property [
+        sh:path srest:transmitted ;
+        sh:class srest:Witness ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+
+    ## Data properties
+    sh:property [
+        sh:path srest:sigil ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:label ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:hypothetical ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+
+    ## Complex constraints
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Hypothetical witnesses may not belong to traditions" ;
+        sh:prefixes srest: ;
+        sh:select """
+            SELECT $this (srest:witnessedBy as ?path) ?value 
+            WHERE {
+                ?value a srest:Tradition ;
+                    srest:witnessedBy $this .
+                $this srest:hypothetical true .
+            }
+        """ ;
+    ] ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type intern:quotesigil )
+.
+
+### Section
+srshps:SectionShape a sh:NodeShape ;
+    sh:targetClass srest:Section ;
+
+    ## Object properties
+    sh:property [
+        sh:path srest:next ;
+        sh:class srest:Section ;
+        sh:nodeKind sh:IRI ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path srest:collation ;
+        sh:class srest:StartReading ;
+        sh:nodeKind sh:IRI ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path srest:hasEnd ;
+        sh:class srest:EndReading ;
+        sh:nodeKind sh:IRI ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path srest:hasEmendation ;
+        sh:class srest:Emendation ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+
+    ## Data properties
+    sh:property srshps:namePropShape ;
+    sh:property srshps:langPropShape ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type srest:hasAnnotation )
+.
+
+### Stemma
+srshps:StemmaShape a sh:NodeShape ;
+    sh:targetClass srest:Stemma ;
+
+    ## Object properties
+    sh:property [
+        sh:path srest:hasWitness ;
+        sh:class srest:Witness ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:hasArchetype ;
+        sh:class srest:Witness ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+
+    ## Data properties
+    sh:property srshps:namePropShape ;
+    sh:property [
+        sh:path srest:directed ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isContaminated ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+
+    ## Complex constraints
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+		sh:message "All witnesses must be either hypothetical or belong to the same tradition." ;
+		sh:prefixes srest: ;
+		sh:select """
+            SELECT $this (srest:hasWitness as ?path) ?value
+            WHERE {
+                ?trad srest:witnessedBy ?value .
+                ?mytrad srest:hasStemma $this .
+                FILTER (?mytrad != ?trad ) .
+            }
+        """ ;
+    ] ;
+    # n.b. This one legitimately fails at the moment...
+    # sh:sparql [
+    #     a sh:SPARQLConstraint ;
+    #     sh:message "Hypothetical witnesses may only belong to one stemma" ;
+    #     sh:prefixes srest: ;
+    #     sh:select """
+    #         SELECT $this (srest:hasWitness as ?path) ?value 
+    #         WHERE {
+    #             $this srest:hasWitness ?value .
+    #             ?other srest:hasWitness ?value .
+    #             ?value srest:hypothetical true .
+    #             FILTER (?other != $this) .
+    #         }
+    #     """ ;
+    # ] ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type intern:fromJobid srest:fromJobid )
+.
+
+### Reading
+srshps:ReadingShape a sh:NodeShape ;
+    sh:targetClass srest:Reading ;
+    
+    ## Object properties
+     sh:property [
+        sh:path srest:sequence ;
+        sh:class srest:Reading ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+     sh:property [
+        sh:path srest:lemmaText ;
+        sh:class srest:Reading ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:related ;
+        sh:class srest:Reading ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:emended ;
+        sh:class srest:Emendation ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+
+    ## Data properties
+    sh:property srshps:langPropShape ;
+    sh:property [
+        sh:path srest:text ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:normalForm ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:display ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:rank ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:long ;
+    ] ;
+    sh:property [
+        sh:path srest:joinPrior ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:joinNext ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isLemma ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isNonsense ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:grammarInvalid ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type srest:sectionId srest:extra srest:authority )
+.
+
+## StartReading
+srshps:StartReadingShape a sh:NodeShape ;
+    sh:targetClass srest:StartReading ;
+    sh:property [
+        sh:path srest:rank ;
+        sh:hasValue 0 ;
+    ] ;
+    sh:property [
+        sh:path srest:text ;
+        sh:hasValue "#START#" ;
+    ] ;
+
+    ## Complex constraints
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+		sh:message "A start reading cannot have any incoming sequence links" ;
+		sh:prefixes srest: ;
+		sh:select """
+            SELECT $this (srest:sequence as ?path) ?value
+            WHERE {
+                ?value srest:sequence $this .
+            }
+        """ ;
+    ] ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type srest:sectionId ) ;
+.
+
+srshps:EmendationShape a sh:NodeShape ;
+    sh:targetClass srest:Emendation ;
+     sh:property [
+        sh:path srest:sequence ;
+        sh:class srest:Reading ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path srest:authority ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:emended ;
+        sh:class srest:Reading ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+.
+
+### Relation type definitions
+srshps:RelationTypeShape a sh:NodeShape ;
+    sh:targetClass srest:RelationType ;
+
+    ## Data properties
+    sh:property srshps:namePropShape ;
+    sh:property [
+        sh:path srest:description ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path srest:bindlevel ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:int ;
+    ] ;
+    sh:property [
+        sh:path srest:isColocation ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isGeneralizable ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isTransitive ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:isWeak ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
+        sh:path srest:useRegular ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+.
+
