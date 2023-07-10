@@ -98,6 +98,11 @@ public class Converter {
                     finalLabel = subclassProperties.get(k);
                     continue;
                 }
+                // Convert the text direction into IRIs
+                if (k.equals("direction")) {
+                    Property predicate = model.createProperty(srest + k);
+                    iri.addProperty(predicate, model.createResource(srest + nodeProperties.get(k)));
+                }
                 // Node data properties should be camel case; we might also need to change some
                 String kconv = convertLabel(k, false);
                 String ns = internalLabels.contains(k) ? intern : srest;

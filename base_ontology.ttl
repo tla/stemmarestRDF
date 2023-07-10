@@ -30,6 +30,12 @@
 #    Object Properties
 #################################################################
 
+###  https://stemmaweb.net/ontologies/stemmarest#direction
+:direction rdf:type owl:ObjectProperty ;
+           rdfs:domain :Tradition ;
+           rdfs:range :TextDirection .
+
+
 ###  https://stemmaweb.net/ontologies/stemmarest/witnessedBy
 <https://stemmaweb.net/ontologies/stemmarest/witnessedBy> rdf:type owl:ObjectProperty ;
                                                           rdfs:domain :Tradition ;
@@ -38,14 +44,13 @@
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#annotationLink
 :annotationLink rdf:type owl:ObjectProperty ,
-                         owl:AsymmetricProperty ;
+                         owl:AsymmetricProperty ,
+                         owl:IrreflexiveProperty ;
                 rdfs:domain :Annotation .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#collation
-:collation rdf:type owl:ObjectProperty ,
-                    owl:FunctionalProperty ,
-                    owl:InverseFunctionalProperty ;
+:collation rdf:type owl:ObjectProperty ;
            rdfs:domain :Section ;
            rdfs:range :StartReading .
 
@@ -61,107 +66,73 @@
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasAnnotation
-:hasAnnotation rdf:type owl:ObjectProperty ,
-                        owl:InverseFunctionalProperty ,
-                        owl:AsymmetricProperty ,
-                        owl:IrreflexiveProperty ;
+:hasAnnotation rdf:type owl:ObjectProperty ;
                rdfs:domain :Tradition ;
                rdfs:range :Annotation .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasAnnotationType
-:hasAnnotationType rdf:type owl:ObjectProperty ,
-                            owl:InverseFunctionalProperty ;
+:hasAnnotationType rdf:type owl:ObjectProperty ;
                    rdfs:domain :Tradition ;
                    rdfs:range :AnnotationLabel .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasArchetype
-:hasArchetype rdf:type owl:ObjectProperty ,
-                       owl:FunctionalProperty ,
-                       owl:InverseFunctionalProperty ,
-                       owl:AsymmetricProperty ,
-                       owl:IrreflexiveProperty ;
+:hasArchetype rdf:type owl:ObjectProperty ;
               rdfs:domain :Stemma ;
               rdfs:range :Witness .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasEmendation
-:hasEmendation rdf:type owl:ObjectProperty ,
-                        owl:InverseFunctionalProperty ,
-                        owl:AsymmetricProperty ,
-                        owl:IrreflexiveProperty ;
+:hasEmendation rdf:type owl:ObjectProperty ;
                rdfs:domain :Section ;
                rdfs:range :Emendation .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasEnd
-:hasEnd rdf:type owl:ObjectProperty ,
-                 owl:FunctionalProperty ,
-                 owl:InverseFunctionalProperty ;
+:hasEnd rdf:type owl:ObjectProperty ;
         rdfs:domain :Section ;
         rdfs:range :EndReading .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasLinks
-:hasLinks rdf:type owl:ObjectProperty ,
-                   owl:FunctionalProperty ,
-                   owl:InverseFunctionalProperty ,
-                   owl:AsymmetricProperty ,
-                   owl:IrreflexiveProperty ;
+:hasLinks rdf:type owl:ObjectProperty ;
           rdfs:domain :AnnotationLabel ;
           rdfs:range :Links .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasProperties
-:hasProperties rdf:type owl:ObjectProperty ,
-                        owl:FunctionalProperty ,
-                        owl:InverseFunctionalProperty ,
-                        owl:AsymmetricProperty ,
-                        owl:IrreflexiveProperty ;
+:hasProperties rdf:type owl:ObjectProperty ;
                rdfs:domain :AnnotationLabel ;
                rdfs:range :Properties .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasReading
-:hasReading rdf:type owl:ObjectProperty ,
-                     owl:InverseFunctionalProperty ,
-                     owl:AsymmetricProperty ,
-                     owl:IrreflexiveProperty ;
+:hasReading rdf:type owl:ObjectProperty ;
             rdfs:domain :Section ;
             rdfs:range :Reading .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasRelationType
-:hasRelationType rdf:type owl:ObjectProperty ,
-                          owl:InverseFunctionalProperty ,
-                          owl:AsymmetricProperty ,
-                          owl:IrreflexiveProperty ;
+:hasRelationType rdf:type owl:ObjectProperty ;
                  rdfs:domain :Tradition ;
                  rdfs:range :RelationType .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasStemma
-:hasStemma rdf:type owl:ObjectProperty ,
-                    owl:InverseFunctionalProperty ,
-                    owl:AsymmetricProperty ,
-                    owl:IrreflexiveProperty ;
+:hasStemma rdf:type owl:ObjectProperty ;
            rdfs:domain :Tradition ;
            rdfs:range :Stemma .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasWitness
-:hasWitness rdf:type owl:ObjectProperty ,
-                     owl:InverseFunctionalProperty ;
+:hasWitness rdf:type owl:ObjectProperty ;
             rdfs:domain :Stemma ;
             rdfs:range :Witness .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#inSection
-:inSection rdf:type owl:ObjectProperty ,
-                    owl:FunctionalProperty ,
-                    owl:AsymmetricProperty ,
-                    owl:IrreflexiveProperty ;
+:inSection rdf:type owl:ObjectProperty ;
            rdfs:domain :Reading ;
            rdfs:range :Section .
 
@@ -181,35 +152,25 @@
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#linked
-:linked rdf:type owl:ObjectProperty ,
-                 owl:AsymmetricProperty ,
-                 owl:IrreflexiveProperty ;
+:linked rdf:type owl:ObjectProperty ;
         rdfs:domain :Annotation ;
         rdfs:range owl:Thing .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#next
-:next rdf:type owl:ObjectProperty ,
-               owl:AsymmetricProperty ,
-               owl:IrreflexiveProperty ;
+:next rdf:type owl:ObjectProperty ;
       rdfs:domain :Section ;
       rdfs:range :Section .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#ownsTradition
-:ownsTradition rdf:type owl:ObjectProperty ,
-                        owl:InverseFunctionalProperty ,
-                        owl:AsymmetricProperty ,
-                        owl:IrreflexiveProperty ;
+:ownsTradition rdf:type owl:ObjectProperty ;
                rdfs:domain :User ;
                rdfs:range :Tradition .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#part
-:part rdf:type owl:ObjectProperty ,
-               owl:InverseFunctionalProperty ,
-               owl:AsymmetricProperty ,
-               owl:IrreflexiveProperty ;
+:part rdf:type owl:ObjectProperty ;
       rdfs:domain :Tradition ;
       rdfs:range :Section .
 
@@ -287,24 +248,6 @@
                    owl:FunctionalProperty ;
           rdfs:domain :Stemma ;
           rdfs:range xsd:boolean .
-
-
-###  https://www.stemmaweb.net/ontologies/stemmarest#direction
-:direction rdf:type owl:DatatypeProperty ,
-                    owl:FunctionalProperty ;
-           rdfs:domain :Tradition ;
-           rdfs:range [ rdf:type rdfs:Datatype ;
-                        owl:oneOf [ rdf:type rdf:List ;
-                                    rdf:first "BI" ;
-                                    rdf:rest [ rdf:type rdf:List ;
-                                               rdf:first "LR" ;
-                                               rdf:rest [ rdf:type rdf:List ;
-                                                          rdf:first "RL" ;
-                                                          rdf:rest rdf:nil
-                                                        ]
-                                             ]
-                                  ]
-                      ] .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#email
@@ -415,7 +358,7 @@
 ###  https://www.stemmaweb.net/ontologies/stemmarest#rank
 :rank rdf:type owl:DatatypeProperty ;
       rdfs:domain :Reading ;
-      rdfs:range xsd:positiveInteger .
+      rdfs:range xsd:long .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#role
@@ -513,6 +456,10 @@
 :Stemma rdf:type owl:Class .
 
 
+###  https://www.stemmaweb.net/ontologies/stemmarest#TextDirection
+:TextDirection rdf:type owl:Class .
+
+
 ###  https://www.stemmaweb.net/ontologies/stemmarest#Tradition
 :Tradition rdf:type owl:Class .
 
@@ -523,6 +470,46 @@
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#Witness
 :Witness rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  https://stemmaweb.net/ontologies/stemmarest#BI
+:BI rdf:type owl:NamedIndividual ,
+             :TextDirection .
+
+
+###  https://stemmaweb.net/ontologies/stemmarest#LR
+:LR rdf:type owl:NamedIndividual ,
+             :TextDirection .
+
+
+###  https://stemmaweb.net/ontologies/stemmarest#RL
+:RL rdf:type owl:NamedIndividual ,
+             :TextDirection .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Annotation
+                :AnnotationLabel
+                :Links
+                :Properties
+                :Reading
+                :RelationType
+                :Section
+                :Stemma
+                :TextDirection
+                :Tradition
+                :User
+                :Witness
+              )
+] .
 
 
 ###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

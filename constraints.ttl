@@ -108,7 +108,12 @@ srshps:WitnessShape a sh:NodeShape ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "Hypothetical witnesses may not belong to traditions" ;
-        sh:prefixes srest: ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "srest" ;
+                sh:namespace srest: ;
+            ]
+        ] ;
         sh:select """
             SELECT $this (srest:witnessedBy as ?path) ?value 
             WHERE {
@@ -192,7 +197,12 @@ srshps:StemmaShape a sh:NodeShape ;
     sh:sparql [
         a sh:SPARQLConstraint ;
 		sh:message "All witnesses must be either hypothetical or belong to the same tradition." ;
-		sh:prefixes srest: ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "srest" ;
+                sh:namespace srest: ;
+            ]
+        ] ;
 		sh:select """
             SELECT $this (srest:hasWitness as ?path) ?value
             WHERE {
@@ -206,7 +216,12 @@ srshps:StemmaShape a sh:NodeShape ;
     # sh:sparql [
     #     a sh:SPARQLConstraint ;
     #     sh:message "Hypothetical witnesses may only belong to one stemma" ;
-    #     sh:prefixes srest: ;
+    #     sh:prefixes [
+    #         sh:declare [
+    #             sh:prefix "srest" ;
+    #             sh:namespace srest: ;
+    #         ]
+    #     ] ;
     #     sh:select """
     #         SELECT $this (srest:hasWitness as ?path) ?value 
     #         WHERE {
@@ -316,7 +331,12 @@ srshps:StartReadingShape a sh:NodeShape ;
     sh:sparql [
         a sh:SPARQLConstraint ;
 		sh:message "A start reading cannot have any incoming sequence links" ;
-		sh:prefixes srest: ;
+        sh:prefixes [
+            sh:declare [
+                sh:prefix "srest" ;
+                sh:namespace srest: ;
+            ]
+        ] ;
 		sh:select """
             SELECT $this (srest:sequence as ?path) ?value
             WHERE {
@@ -325,7 +345,7 @@ srshps:StartReadingShape a sh:NodeShape ;
         """ ;
     ] ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type srest:sectionId ) ;
+    sh:ignoredProperties ( rdf:type intern:sectionId ) ;
 .
 
 srshps:EmendationShape a sh:NodeShape ;
