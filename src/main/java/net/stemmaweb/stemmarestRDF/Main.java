@@ -14,6 +14,15 @@ import org.apache.jena.shacl.ShaclValidator;
 import org.apache.jena.shacl.Shapes;
 import org.apache.jena.shacl.ValidationReport;
 import org.apache.jena.shacl.lib.ShLib;
+//import org.semanticweb.HermiT.Configuration;
+//import org.semanticweb.HermiT.Reasoner;
+//import org.semanticweb.HermiT.ReasonerFactory;
+//import org.semanticweb.owlapi.apibinding.OWLManager;
+//import org.semanticweb.owlapi.model.OWLDataFactory;
+//import org.semanticweb.owlapi.model.OWLOntology;
+//import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+//import org.semanticweb.owlapi.model.OWLOntologyManager;
+//import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import java.io.*;
 import java.util.Iterator;
@@ -93,6 +102,7 @@ public class Main {
         }
 
         // Send each one to the converter and get the model back
+        System.out.println("Reading graph from file...");
         Converter c = new Converter(clm.hasOption("star"), oPrefix, dPrefix, iPrefix);
         for (String fk : extractedFiles.keySet()) {
             try {
@@ -104,10 +114,21 @@ public class Main {
                 exit(1);
             }
         }
+        // Write out the model we parsed
+        if (clm.hasOption("outfile")) {
+            try {
+                Writer.writeModel(fullModel, clm.getOptionValue("outfile"));
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                exit(1);
+            }
+        }
 
         // Validate the model against our OWL ontology
-        if (clm.hasOption("e")) {
-            Model schema = RDFDataMgr.loadModel("file:" + clm.getOptionValue("e"));
+        if (clm.hasOption("ontology")) {
+            System.out.println("Validating graph against provided ontology...");
+            // With the Jena reasoner
+            Model schema = RDFDataMgr.loadModel("file:" + clm.getOptionValue("ontology"));
             Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
             reasoner = reasoner.bindSchema(schema);
             InfModel infModel = ModelFactory.createInfModel(reasoner, fullModel);
@@ -122,23 +143,33 @@ public class Main {
                     System.out.println(" - " + report);
                 }
             }
+            // With the OWL API and HermiT
+//            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//            OWLDataFactory dataFactory = manager.getOWLDataFactory();
+//            File ontologyFile = new File(clm.getOptionValue("ontology"));
+//            OWLOntology ontology = null;
+//            try {
+//                ontology = manager.loadOntologyFromOntologyDocument(ontologyFile);
+//            } catch (OWLOntologyCreationException e) {
+//                System.err.printf("Could not load ontology from file %s", clm.getOptionValue("ontology"));
+//                exit(1);
+//            }
+//            Reasoner.ReasonerFactory factory = new ReasonerFactory();
+//            Configuration config = new Configuration();
+//            config.throwInconsistentOntologyException = false;
+//            OWLReasoner reasoner = factory.createReasoner(ontology, config);
+
         }
 
         // Validate the model against our SHACL shapes file
-        if (clm.hasOption("s")) {
-            Graph shapesGraph = RDFDataMgr.loadGraph(clm.getOptionValue("c"));
+        if (clm.hasOption("shacl")) {
+            System.out.println("Validating graph against provided shapes file...");
+            Graph shapesGraph = RDFDataMgr.loadGraph(clm.getOptionValue("shacl"));
             Shapes shapes = Shapes.parse(shapesGraph);
             Graph dataGraph = fullModel.getGraph();
             ValidationReport report = ShaclValidator.get().validate(shapes, dataGraph);
             ShLib.printReport(report);
         }
 
-        // Serialize the model to the requested format
-        try {
-            Writer.writeModel(fullModel, clm.getOptionValue("outfile"));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            exit(1);
-        }
     }
 }

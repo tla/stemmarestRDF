@@ -59,6 +59,10 @@ public class Converter {
         subclassProperties.put("is_start", "StartReading");
         subclassProperties.put("is_end", "EndReading");
         subclassProperties.put("is_lacuna", "Lacuna");
+        Resource text_direction = model.createResource(srest + "TextDirection");
+        model.createResource(srest + "LR").addProperty(RDF.type, text_direction);
+        model.createResource(srest + "RL").addProperty(RDF.type, text_direction);
+        model.createResource(srest + "BI").addProperty(RDF.type, text_direction);
 
         // Iterate through the nodes and make RDF labels for them
         NodeList entityNodes = rootEl.getElementsByTagName("node");
@@ -102,6 +106,7 @@ public class Converter {
                 if (k.equals("direction")) {
                     Property predicate = model.createProperty(srest + k);
                     iri.addProperty(predicate, model.createResource(srest + nodeProperties.get(k)));
+                    continue;
                 }
                 // Node data properties should be camel case; we might also need to change some
                 String kconv = convertLabel(k, false);

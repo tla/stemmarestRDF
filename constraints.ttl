@@ -1,4 +1,5 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix srest: <https://www.stemmaweb.net/ontologies/stemmarest#> .
 @prefix srshps: <https://www.stemmaweb.net/ontologies/shapes#> .
@@ -64,8 +65,8 @@ srest:TraditionShape a sh:NodeShape ;
     sh:property [
         sh:path srest:direction ;
         sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:pattern "^(LR|RL|BI)$";
+        sh:class srest:TextDirection ;
+        sh:nodeKind sh:IRI ;
     ] ;
     sh:property [
         sh:path srest:isPublic ;
@@ -73,7 +74,7 @@ srest:TraditionShape a sh:NodeShape ;
         sh:datatype xsd:boolean ;
     ] ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type intern:version )
+    sh:ignoredProperties ( rdf:type owl:sameAs intern:version )
 .
 
 ### Witness
@@ -111,7 +112,7 @@ srshps:WitnessShape a sh:NodeShape ;
         sh:prefixes [
             sh:declare [
                 sh:prefix "srest" ;
-                sh:namespace srest: ;
+                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
             ]
         ] ;
         sh:select """
@@ -124,7 +125,7 @@ srshps:WitnessShape a sh:NodeShape ;
         """ ;
     ] ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type intern:quotesigil )
+    sh:ignoredProperties ( rdf:type owl:sameAs intern:quotesigil )
 .
 
 ### Section
@@ -160,7 +161,7 @@ srshps:SectionShape a sh:NodeShape ;
     sh:property srshps:namePropShape ;
     sh:property srshps:langPropShape ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type srest:hasAnnotation )
+    sh:ignoredProperties ( rdf:type owl:sameAs srest:hasAnnotation )
 .
 
 ### Stemma
@@ -200,7 +201,7 @@ srshps:StemmaShape a sh:NodeShape ;
         sh:prefixes [
             sh:declare [
                 sh:prefix "srest" ;
-                sh:namespace srest: ;
+                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
             ]
         ] ;
 		sh:select """
@@ -212,28 +213,8 @@ srshps:StemmaShape a sh:NodeShape ;
             }
         """ ;
     ] ;
-    # n.b. This one legitimately fails at the moment...
-    # sh:sparql [
-    #     a sh:SPARQLConstraint ;
-    #     sh:message "Hypothetical witnesses may only belong to one stemma" ;
-    #     sh:prefixes [
-    #         sh:declare [
-    #             sh:prefix "srest" ;
-    #             sh:namespace srest: ;
-    #         ]
-    #     ] ;
-    #     sh:select """
-    #         SELECT $this (srest:hasWitness as ?path) ?value 
-    #         WHERE {
-    #             $this srest:hasWitness ?value .
-    #             ?other srest:hasWitness ?value .
-    #             ?value srest:hypothetical true .
-    #             FILTER (?other != $this) .
-    #         }
-    #     """ ;
-    # ] ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type intern:fromJobid srest:fromJobid )
+    sh:ignoredProperties ( rdf:type owl:sameAs intern:fromJobid )
 .
 
 ### Reading
@@ -301,6 +282,11 @@ srshps:ReadingShape a sh:NodeShape ;
         sh:datatype xsd:boolean ;
     ] ;
     sh:property [
+        sh:path srest:isCommon ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+    ] ;
+    sh:property [
         sh:path srest:isNonsense ;
         sh:maxCount 1 ;
         sh:datatype xsd:boolean ;
@@ -312,7 +298,7 @@ srshps:ReadingShape a sh:NodeShape ;
     ] ;
 
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type srest:sectionId srest:extra srest:authority )
+    sh:ignoredProperties ( rdf:type owl:sameAs intern:sectionId srest:extra srest:authority srest:lexemes)
 .
 
 ## StartReading
@@ -320,7 +306,7 @@ srshps:StartReadingShape a sh:NodeShape ;
     sh:targetClass srest:StartReading ;
     sh:property [
         sh:path srest:rank ;
-        sh:hasValue 0 ;
+        sh:hasValue "0"^^xsd:long ;
     ] ;
     sh:property [
         sh:path srest:text ;
@@ -334,7 +320,7 @@ srshps:StartReadingShape a sh:NodeShape ;
         sh:prefixes [
             sh:declare [
                 sh:prefix "srest" ;
-                sh:namespace srest: ;
+                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
             ]
         ] ;
 		sh:select """
@@ -345,7 +331,7 @@ srshps:StartReadingShape a sh:NodeShape ;
         """ ;
     ] ;
     sh:closed true ;
-    sh:ignoredProperties ( rdf:type intern:sectionId ) ;
+    sh:ignoredProperties ( rdf:type owl:sameAs intern:sectionId ) ;
 .
 
 srshps:EmendationShape a sh:NodeShape ;

@@ -30,12 +30,6 @@
 #    Object Properties
 #################################################################
 
-###  https://stemmaweb.net/ontologies/stemmarest#direction
-:direction rdf:type owl:ObjectProperty ;
-           rdfs:domain :Tradition ;
-           rdfs:range :TextDirection .
-
-
 ###  https://stemmaweb.net/ontologies/stemmarest/witnessedBy
 <https://stemmaweb.net/ontologies/stemmarest/witnessedBy> rdf:type owl:ObjectProperty ;
                                                           rdfs:domain :Tradition ;
@@ -53,6 +47,12 @@
 :collation rdf:type owl:ObjectProperty ;
            rdfs:domain :Section ;
            rdfs:range :StartReading .
+
+
+###  https://www.stemmaweb.net/ontologies/stemmarest#direction
+:direction rdf:type owl:ObjectProperty ;
+           rdfs:domain :Tradition ;
+           rdfs:range :TextDirection .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#emended
@@ -120,7 +120,8 @@
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasStemma
-:hasStemma rdf:type owl:ObjectProperty ;
+:hasStemma rdf:type owl:ObjectProperty ,
+                    owl:InverseFunctionalProperty ;
            rdfs:domain :Tradition ;
            rdfs:range :Stemma .
 
@@ -476,17 +477,17 @@
 #    Individuals
 #################################################################
 
-###  https://stemmaweb.net/ontologies/stemmarest#BI
+###  https://www.stemmaweb.net/ontologies/stemmarest#BI
 :BI rdf:type owl:NamedIndividual ,
              :TextDirection .
 
 
-###  https://stemmaweb.net/ontologies/stemmarest#LR
+###  https://www.stemmaweb.net/ontologies/stemmarest#LR
 :LR rdf:type owl:NamedIndividual ,
              :TextDirection .
 
 
-###  https://stemmaweb.net/ontologies/stemmarest#RL
+###  https://www.stemmaweb.net/ontologies/stemmarest#RL
 :RL rdf:type owl:NamedIndividual ,
              :TextDirection .
 

@@ -67,7 +67,16 @@
             <artifactId>commons-cli</artifactId>
             <version>1.5.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>net.sourceforge.owlapi</groupId>
+            <artifactId>owlapi-api</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ansell.hermit</groupId>
+            <artifactId>HermiT</artifactId>
+            <version>1.3.8.2-ansell</version>
+        </dependency>
     </dependencies>
 
 </project>
