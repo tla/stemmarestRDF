@@ -12,7 +12,6 @@ srest:StartReading rdfs:subClassOf srest:Metareading .
 srest:EndReading rdfs:subClassOf srest:Metareading .
 srest:Metareading rdfs:subClassOf srest:Reading .
 srest:Emendation rdfs:subClassOf srest:Reading .
-srest:LemmaReading rdfs:subClassOf srest:Reading .
 
 ###### Common properties #####
 
@@ -62,7 +61,7 @@ srshps:rankPropShape a sh:PropertyShape ;
     sh:path srest:rank ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
-    sh:datatype xsd:long .
+    sh:datatype xsd:integer .
 srshps:jpPropShape a sh:PropertyShape ;
     sh:path srest:joinPrior ;
     sh:maxCount 1 ;
@@ -83,7 +82,6 @@ srshps:ginvPropShape a sh:PropertyShape ;
     sh:path srest:grammarInvalid ;
     sh:maxCount 1 ;
     sh:datatype xsd:boolean .
-
 
 ###### Node shapes ######
 
@@ -169,25 +167,6 @@ srshps:WitnessShape a sh:NodeShape ;
         sh:datatype xsd:boolean ;
     ] ;
 
-    ## Complex constraints
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-        sh:message "Hypothetical witnesses may not belong to traditions" ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-        sh:select """
-            SELECT $this (srest:witnessedBy as ?path) ?value 
-            WHERE {
-                ?value a srest:Tradition ;
-                    srest:witnessedBy $this .
-                $this srest:hypothetical true .
-            }
-        """ ;
-    ] ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type owl:sameAs intern:quotesigil )
 .
@@ -264,44 +243,6 @@ srshps:StemmaShape a sh:NodeShape ;
         sh:datatype xsd:boolean ;
     ] ;
 
-    ## Complex constraints
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-		sh:message "All witnesses must be either hypothetical or belong to the same tradition." ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-		sh:select """
-            SELECT $this (srest:hasWitness as ?path) ?value
-            WHERE {
-                ?trad srest:witnessedBy ?value .
-                ?mytrad srest:hasStemma $this .
-                FILTER (?mytrad != ?trad ) .
-            }
-        """ ;
-    ] ;
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-        sh:message "Hypothetical witnesses may only belong to one stemma" ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-        sh:select """
-            SELECT $this (srest:hasWitness as ?path) ?value 
-            WHERE {
-                $this srest:hasWitness ?value .
-                ?ostemma srest:hasWitness ?value .
-                ?value srest:hypothetical true .
-                FILTER ($this != ?ostemma) .
-            }
-        """ ;
-    ] ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type owl:sameAs intern:fromJobid )
 .
@@ -309,52 +250,12 @@ srshps:StemmaShape a sh:NodeShape ;
 ### Reading
 srshps:ReadingShape a sh:NodeShape ;
     sh:targetClass srest:Reading ;
-    
+        
     ## Object and data properties
     sh:property srshps:rdgSequenceShape, srshps:rdgRelatedShape, srshps:rdgEmendedShape,
         srshps:langPropShape, srshps:textPropShape, srshps:nfPropShape, srshps:displayPropShape, 
         srshps:rankPropShape, srshps:jpPropShape, srshps:jnPropShape, srshps:commonPropShape, 
         srshps:nonsensePropShape, srshps:ginvPropShape ;
-
-    ## Complex constraints
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-		sh:message "Readings in sequence should belong to the same section" ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-		sh:select """
-            SELECT $this (srest:sequence as ?path) ?value
-            WHERE {
-                $this srest:sequence ?value .
-                ?section srest:hasReading $this .
-                ?osect srest:hasReading ?value .
-                FILTER (?section != ?osect ) .
-            }
-        """ ;
-    ] ;
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-		sh:message "Related readings should belong to the same section" ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-		sh:select """
-            SELECT $this (srest:related as ?path) ?value
-            WHERE {
-                $this srest:related ?value .
-                ?section srest:hasReading $this .
-                ?osect srest:hasReading ?value .
-                FILTER (?section != ?osect ) .
-            }
-        """ ;
-    ] ;
 
     sh:closed true ;
     sh:ignoredProperties ( rdf:type owl:sameAs intern:sectionId srest:extra srest:authority srest:lexemes)
@@ -369,7 +270,7 @@ srshps:StartReadingShape a sh:NodeShape ;
 
     sh:property [
         sh:path srest:rank ;
-        sh:hasValue "0"^^xsd:long ;
+        sh:hasValue "0"^^xsd:integer ;
     ] ;
 
     sh:closed true ;
@@ -381,26 +282,6 @@ srshps:EndReadingShape a sh:NodeShape ;
     sh:targetClass srest:EndReading ;
     sh:property srshps:rankPropShape ;
 
-    ## Complex constraints
-    # sh:sparql [
-    #     a sh:SPARQLConstraint ;
-	# 	sh:message "An end reading must have the highest rank for its section" ;
-    #     sh:prefixes [
-    #         sh:declare [
-    #             sh:prefix "srest" ;
-    #             sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-    #         ]
-    #     ] ;
-	# 	sh:select """
-    #         SELECT $this (srest:rank as ?path) ?rdg
-    #         WHERE {
-    #             $this srest:rank ?value .
-    #             ?section srest:hasReading ?rdg .
-    #             ?rdg srest:rank ?ovalue .
-    #             FILTER(?ovalue >= ?value && ?rdg != $this) .
-    #         }
-    #     """ ;
-    # ] ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type owl:sameAs intern:sectionId ) ;
 .
@@ -442,27 +323,6 @@ srshps:LemmaReadingShape a sh:NodeShape ;
         sh:class srest:Reading ;
         sh:nodeKind sh:IRI ;
     ] ;
-    ## Complex constraints
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-		sh:message "No two lemma readings in a section may share a rank" ;
-        sh:prefixes [
-            sh:declare [
-                sh:prefix "srest" ;
-                sh:namespace "https://www.stemmaweb.net/ontologies/stemmarest#" ;
-            ]
-        ] ;
-		sh:select """
-            SELECT $this (srest:rank as ?path) ?value
-            WHERE {
-                $this srest:rank ?rank .
-                ?value srest:rank ?rank .
-                ?section srest:hasReading $this, ?value .
-                FILTER($this != ?value) .
-            }
-        """ ;
-    ] ;
-
     sh:closed true ;
     sh:ignoredProperties ( rdf:type owl:sameAs intern:sectionId ) ;
 .
@@ -481,7 +341,7 @@ srshps:RelationTypeShape a sh:NodeShape ;
     sh:property [
         sh:path srest:bindlevel ;
         sh:maxCount 1 ;
-        sh:datatype xsd:int ;
+        sh:datatype xsd:integer ;
     ] ;
     sh:property [
         sh:path srest:isColocation ;

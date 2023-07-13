@@ -30,6 +30,24 @@
 #    Object Properties
 #################################################################
 
+###  https://stemmaweb.net/ontologies/stemmarest#lemmaText
+:lemmaText rdf:type owl:ObjectProperty ,
+                    owl:FunctionalProperty ,
+                    owl:InverseFunctionalProperty ,
+                    owl:AsymmetricProperty ,
+                    owl:IrreflexiveProperty ;
+           rdfs:domain [ rdf:type owl:Class ;
+                         owl:unionOf ( :LemmaReading
+                                       :StartReading
+                                     )
+                       ] ;
+           rdfs:range [ rdf:type owl:Class ;
+                        owl:unionOf ( :LemmaReading
+                                      :EndReading
+                                    )
+                      ] .
+
+
 ###  https://stemmaweb.net/ontologies/stemmarest/witnessedBy
 <https://stemmaweb.net/ontologies/stemmarest/witnessedBy> rdf:type owl:ObjectProperty ;
                                                           rdfs:domain :Tradition ;
@@ -44,7 +62,9 @@
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#collation
-:collation rdf:type owl:ObjectProperty ;
+:collation rdf:type owl:ObjectProperty ,
+                    owl:FunctionalProperty ,
+                    owl:InverseFunctionalProperty ;
            rdfs:domain :Section ;
            rdfs:range :StartReading .
 
@@ -108,7 +128,8 @@
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#hasReading
-:hasReading rdf:type owl:ObjectProperty ;
+:hasReading rdf:type owl:ObjectProperty ,
+                     owl:InverseFunctionalProperty ;
             rdfs:domain :Section ;
             rdfs:range :Reading .
 
@@ -199,12 +220,20 @@
 :sequence rdf:type owl:ObjectProperty ,
                    owl:AsymmetricProperty ,
                    owl:IrreflexiveProperty ;
-          rdfs:domain :Lacuna ,
-                      :Reading ,
-                      :StartReading ;
-          rdfs:range :EndReading ,
-                     :Lacuna ,
-                     :Reading .
+          rdfs:domain [ owl:intersectionOf ( :Reading
+                                             [ rdf:type owl:Class ;
+                                               owl:complementOf :EndReading
+                                             ]
+                                           ) ;
+                        rdf:type owl:Class
+                      ] ;
+          rdfs:range [ owl:intersectionOf ( :Reading
+                                            [ rdf:type owl:Class ;
+                                              owl:complementOf :StartReading
+                                            ]
+                                          ) ;
+                       rdf:type owl:Class
+                     ] .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#transmitted
@@ -373,12 +402,18 @@
 :sigil rdf:type owl:DatatypeProperty ,
                 owl:FunctionalProperty ;
        rdfs:domain :Witness ;
-       rdfs:range xsd:NMTOKEN .
+       rdfs:range xsd:string .
 
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#text
 :text rdf:type owl:DatatypeProperty ;
-      rdfs:domain :Reading ;
+      rdfs:domain [ owl:intersectionOf ( :Reading
+                                         [ rdf:type owl:Class ;
+                                           owl:complementOf :Metareading
+                                         ]
+                                       ) ;
+                    rdf:type owl:Class
+                  ] ;
       rdfs:range xsd:string .
 
 
@@ -399,6 +434,11 @@
 #################################################################
 #    Classes
 #################################################################
+
+###  https://stemmaweb.net/ontologies/stemmarest#LemmaReading
+:LemmaReading rdf:type owl:Class ;
+              rdfs:subClassOf :Reading .
+
 
 ###  https://www.stemmaweb.net/ontologies/stemmarest#Annotation
 :Annotation rdf:type owl:Class .
@@ -477,24 +517,25 @@
 #    Individuals
 #################################################################
 
-###  https://www.stemmaweb.net/ontologies/stemmarest#BI
-:BI rdf:type owl:NamedIndividual ,
-             :TextDirection .
-
-
-###  https://www.stemmaweb.net/ontologies/stemmarest#LR
-:LR rdf:type owl:NamedIndividual ,
-             :TextDirection .
-
-
-###  https://www.stemmaweb.net/ontologies/stemmarest#RL
-:RL rdf:type owl:NamedIndividual ,
-             :TextDirection .
+###  https://stemmaweb.net/resource/187586
+<https://stemmaweb.net/resource/187586> rdf:type owl:NamedIndividual ,
+                                                 :Reading ;
+                                        :language "English" ;
+                                        :rank "201"^^xsd:long ;
+                                        :text "their"^^xsd:string .
 
 
 #################################################################
 #    General axioms
 #################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :LemmaReading
+                :Emendation
+                :Metareading
+              )
+] .
+
 
 [ rdf:type owl:AllDisjointClasses ;
   owl:members ( :Annotation
@@ -509,6 +550,14 @@
                 :Tradition
                 :User
                 :Witness
+              )
+] .
+
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :EndReading
+                :Lacuna
+                :StartReading
               )
 ] .
 

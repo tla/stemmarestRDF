@@ -1,4 +1,6 @@
 package net.stemmaweb.stemmarestRDF;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.w3c.dom.*;
@@ -15,14 +17,16 @@ import java.util.HashMap;
 public class Converter {
 
     boolean useStar;
+    boolean n4jcompat;
     String srest;
     String sdata;
     String intern;
 
     HashMap<String,Resource> substitutions;
 
-    public Converter(boolean star, String ontology, String datapre, String internpre) {
+    public Converter(boolean star, boolean neo4j, String ontology, String datapre, String internpre) {
         this.useStar = star;
+        this.n4jcompat = neo4j;
         this.srest = ontology;
         this.sdata = datapre;
         this.intern = internpre;
@@ -59,6 +63,7 @@ public class Converter {
         subclassProperties.put("is_start", "StartReading");
         subclassProperties.put("is_end", "EndReading");
         subclassProperties.put("is_lacuna", "Lacuna");
+        subclassProperties.put("is_lemma", "LemmaReading");
         Resource text_direction = model.createResource(srest + "TextDirection");
         model.createResource(srest + "LR").addProperty(RDF.type, text_direction);
         model.createResource(srest + "RL").addProperty(RDF.type, text_direction);
@@ -108,27 +113,49 @@ public class Converter {
                     iri.addProperty(predicate, model.createResource(srest + nodeProperties.get(k)));
                     continue;
                 }
+                // Convert the section ID into an actual section link
+                if (k.equals("section_id")) {
+                    Property predicate = model.createProperty(srest + "hasReading") ;
+                    Resource section = model.createResource(sdata + nodeProperties.get(k));
+                    section.addProperty(predicate, iri);
+                    continue;
+                }
+
                 // Node data properties should be camel case; we might also need to change some
                 String kconv = convertLabel(k, false);
                 String ns = internalLabels.contains(k) ? intern : srest;
                 Property predicate = model.createProperty(ns + kconv);
                 Object v = nodeProperties.get(k);
+                // If we are doing this for a Neo4J import, we can only use xsd:integer
+                RDFDatatype vtype = null;
+                if (this.n4jcompat && (v.getClass().equals(Integer.class) || v.getClass().equals(Long.class))) {
+                    // We have to supply the type that Neo4J will recognise.
+                    vtype = XSDDatatype.XSDinteger;
+                }
                 if (v instanceof String[] val)
                     for (String s : val)
                         iri.addProperty(predicate, s);
+                else if (vtype != null)
+                    iri.addProperty(predicate, model.createTypedLiteral(nodeProperties.get(k), vtype));
                 else
                     iri.addProperty(predicate, model.createTypedLiteral(nodeProperties.get(k)));
             }
+            // Clean up after our subclass/metareading conversions
+            if (Arrays.asList("StartReading", "EndReading", "Lacuna").contains(finalLabel))
+                iri.removeAll(model.createProperty(srest + "text"));
             // Now finally say what it is
             iri.addProperty(RDF.type, model.createResource(srest + finalLabel));
             if (!staticClasses.contains(finalLabel))
                 iri.addProperty(RDF.type, model.createProperty(srest + "Annotation"));
-            // If it is a witness, save its sigil in our lookup table
-            if (finalLabel.equals("Witness") && nodeProperties.get("hypothetical").equals(false))
-                substitutions.put("WITNESS-" + nodeProperties.get("sigil").toString(), iri);
-            // If it is a relation type, save its name in our lookup table
-            if (finalLabel.equals("RelationType"))
-                substitutions.put("RTYPE-" + nodeProperties.get("name").toString(), iri);
+            // Substitutions, if we are not having to keep Neo4J compatibility
+            if (!n4jcompat) {
+                // If it is a witness, save its sigil in our lookup table
+                if (finalLabel.equals("Witness") && nodeProperties.get("hypothetical").equals(false))
+                    substitutions.put("WITNESS-" + nodeProperties.get("sigil").toString(), iri);
+                // If it is a relation type, save its name in our lookup table
+                if (finalLabel.equals("RelationType"))
+                    substitutions.put("RTYPE-" + nodeProperties.get("name").toString(), iri);
+            }
         }
 
         // Iterate through the relationships and make object properties and, if we are asked to,
@@ -153,11 +180,12 @@ public class Converter {
             if (srcID.equals(traditionNode) && rdfname.equals("hasWitness"))
                 rdfname = "witnessedBy";
             Property propIRI = model.createProperty(srest + rdfname);
-            // Now add the relationship properties as RDF*
+            // Now add the relationship properties, as RDF* if requested
             if (nodeProperties.isEmpty() || !this.useStar)
                 model.add(srcIRI, propIRI, trgIRI);
             else {
                 Statement st = ResourceFactory.createStatement(srcIRI, propIRI, trgIRI);
+                model.add(st);
                 Resource rst = model.createResource(st);
                 for (String k : nodeProperties.keySet()) {
                     String ns = internalLabels.contains(k) ? intern : srest;
@@ -222,7 +250,6 @@ public class Converter {
                 default -> // e.g. "string"
                         keyVal;
             };
-            // These datatypes need to be kept in sync with exporter.GraphMLExporter
             nodeProperties.put(keyInfo[0], propValue);
         }
         return nodeProperties;
